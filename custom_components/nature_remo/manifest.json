@@ -1,0 +1,11 @@
+{
+  "codeowners": ["@hsanson"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/hsanson/nature_remo",
+  "domain": "nature_remo",
+  "iot_class": "assumed_state",
+  "name": "Nature Remo",
+  "requirements": [],
+  "version": "0.6.0"
+}

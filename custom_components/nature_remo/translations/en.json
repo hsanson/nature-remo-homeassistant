@@ -1,0 +1,24 @@
+{
+  "config": {
+    "error": {
+      "auth": "The auth token provided is not valid."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "access_token": "Nature Remo API Token"
+        },
+        "description": "Get your token from https://home.nature.global",
+        "title": "Authentication"
+      },
+      "pick_device": {
+        "data": {
+          "device_id": "Device id",
+          "devices": "Devices list"
+        },
+        "description": "Select device to integrate",
+        "title": "Pick Device"
+      }
+    }
+  }
+}
