@@ -277,10 +277,9 @@ class NatureRemoAC(CoordinatorEntity, ClimateEntity):
             self._current_temperature = float(device["newest_events"]["te"]["val"])
 
     async def _post(self, data):
-        response = await self.coordinator.async_post(
+        await self.coordinator.async_post(
             f"/appliances/{self._appliance_id}/aircon_settings", data
         )
-        self._update(response)
 
     def _current_mode_temp_range(self):
         temp_range = self._modes[self._remo_mode]["temp"]
