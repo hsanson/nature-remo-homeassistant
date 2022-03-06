@@ -1,6 +1,12 @@
 """ Nature Remo Module """
 import logging
+from datetime import timedelta
 from homeassistant import config_entries, core
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
+from homeassistant.const import (CONF_DEVICES, CONF_ENTITIES)
 
 from .const import DOMAIN
 
@@ -94,3 +100,43 @@ class NatureRemoApi():
 
 class NatureRemoApiError(Exception):
     """ Nature Remo API error exception """
+
+
+class NatureRemoApiCoordinator(DataUpdateCoordinator):
+    """ Nature Remo API Coordinator """
+
+    def __init__(self, hass, api):
+        super().__init__(
+            hass,
+            _LOGGER,
+            name="Nature Remo",
+            update_interval=timedelta(seconds=60),
+        )
+        self.api = api
+
+    async def async_validate_token(self):
+        """ Return account details """
+        return await self.api.get_me()
+
+    async def async_get_devices(self):
+        """ Return dictionary of devices """
+        return {x["id"]: x for x in await self.api.get_devices()}
+
+    async def async_get_appliances(self):
+        """ Return dictionary of appliances """
+        return {x["id"]: x for x in await self.api.get_appliances()}
+
+    async def async_post(self, path, data):
+        """ Post data to Nature Remo cloud """
+        return await self.api.post(path, data)
+
+    async def _async_update_data(self):
+        """ Fetch Nature Remo data from Cloud """
+        _LOGGER.info("Fetching Nature Remo data")
+        try:
+            return {
+                CONF_DEVICES: await self.async_get_devices(),
+                CONF_ENTITIES: await self.async_get_appliances()
+            }
+        except NatureRemoApiError as error:
+            raise UpdateFailed(f"Error communicating with Nature Remo API: {error}") from error

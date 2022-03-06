@@ -22,8 +22,9 @@ from homeassistant.components.climate.const import (
     SUPPORT_SWING_MODE,
     SUPPORT_TARGET_TEMPERATURE,
 )
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.const import (TEMP_CELSIUS, ATTR_TEMPERATURE)
-from . import (NatureRemoApi, NatureRemoApiError)
+from . import (NatureRemoApi, NatureRemoApiCoordinator)
 from .const import (BASE_URL, DOMAIN)
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,6 +59,7 @@ async def async_setup_entry(
     config = hass.data[DOMAIN][config_entry.entry_id]
     session = async_get_clientsession(hass)
     api = NatureRemoApi(BASE_URL, config[CONF_ACCESS_TOKEN], session)
+    coordinator = NatureRemoApiCoordinator(hass, api)
     device_id = config[CONF_DEVICE_ID]
     device = config[CONF_DEVICES][device_id]
     entities = []
@@ -72,16 +74,17 @@ async def async_setup_entry(
                 continue
 
             if appliance["type"] == "AC":
-                entities.append(NatureRemoAC(device, appliance, api))
+                entities.append(NatureRemoAC(device, appliance, coordinator))
 
         async_add_entities(entities, update_before_add=True)
 
 
-class NatureRemoAC(ClimateEntity):
+class NatureRemoAC(CoordinatorEntity, ClimateEntity):
     """ Implement Nature Remo E sensor """
 
-    def __init__(self, device: Dict[str, Any], appliance: Dict[str, Any], api: NatureRemoApi):
-        self.api = api
+    def __init__(self, device: Dict[str, Any], appliance: Dict[str, Any],
+                 coordinator: NatureRemoApiCoordinator):
+        super().__init__(coordinator)
         self._name = f"{device['name']} - {appliance['model']['name']}"
         self._appliance_id = appliance["id"]
         self._available = True
@@ -253,15 +256,7 @@ class NatureRemoAC(ClimateEntity):
         await self._post({"air_direction": swing_mode})
 
     async def async_update(self):
-        """ Update Entity """
-        try:
-            _LOGGER.info("Update %s entity", self._name)
-            device = await self.api.get_device(self._device_id)
-            appliance = await self.api.get_appliance(self._appliance_id)
-            self._update(appliance["settings"], device)
-        except NatureRemoApiError as error:
-            _LOGGER.info("Failed to update entity - %s", error)
-            self._available = False
+        await self.coordinator.async_request_refresh()
 
     def _update(self, ac_settings, device=None):
         # hold this to determin the ac mode while it's turned-off
@@ -282,7 +277,7 @@ class NatureRemoAC(ClimateEntity):
             self._current_temperature = float(device["newest_events"]["te"]["val"])
 
     async def _post(self, data):
-        response = await self.api.post(
+        response = await self.coordinator.async_post(
             f"/appliances/{self._appliance_id}/aircon_settings", data
         )
         self._update(response)
@@ -290,3 +285,10 @@ class NatureRemoAC(ClimateEntity):
     def _current_mode_temp_range(self):
         temp_range = self._modes[self._remo_mode]["temp"]
         return list(map(float, filter(None, temp_range)))
+
+    @core.callback
+    def _handle_coordinator_update(self) -> None:
+        device = self.coordinator.data[CONF_DEVICES][self._device_id]
+        appliance = self.coordinator.data[CONF_ENTITIES][self._appliance_id]
+        self._update(appliance["settings"], device)
+        self.async_write_ha_state()

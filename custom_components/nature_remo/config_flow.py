@@ -9,7 +9,7 @@ from homeassistant import config_entries, core
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from . import (NatureRemoApi, NatureRemoApiError)
+from . import (NatureRemoApi, NatureRemoApiError, NatureRemoApiCoordinator)
 from .const import (DOMAIN, BASE_URL)
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ class NatureRemoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._token = ""
         self._discovered_devices = {}
         self._discovered_entities = {}
+        self._coordinator = Any
 
     data: Optional[Dict[str, Any]]
 
@@ -33,7 +34,10 @@ class NatureRemoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 _LOGGER.info("Check token validity")
                 self._token = user_input[CONF_ACCESS_TOKEN]
-                await self._validate_auth(self._token)
+                session = async_get_clientsession(self.hass)
+                api = NatureRemoApi(BASE_URL, self._token, session)
+                self._coordinator = NatureRemoApiCoordinator(self.hass, api)
+                await self._coordinator.async_validate_token()
             except NatureRemoApiError as error:
                 _LOGGER.error("Could not connect to Nature Remo cloud - %s", error)
                 errors["base"] = "auth"
@@ -62,8 +66,8 @@ class NatureRemoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         }
 
         try:
-            self._discovered_devices = await self._discover_devices(self._token)
-            self._discovered_entities = await self._discover_entities(self._token)
+            self._discovered_devices = await self._discover_devices()
+            self._discovered_entities = await self._discover_entities()
         except NatureRemoApiError as error:
             _LOGGER.error("Could not get list of devices/appliances - %s", error)
             return self.async_abort(reason="connection_fail")
@@ -82,25 +86,13 @@ class NatureRemoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def _validate_auth(self, token: str) -> None:
-        """ Validate Nature Remo Token """
-        session = async_get_clientsession(self.hass)
-        api = NatureRemoApi(BASE_URL, token, session)
-        await api.get_me()
-
-    async def _discover_devices(self, token: str):
+    async def _discover_devices(self):
         """ Discover devices from Nature Remo cloud account """
+        return await self._coordinator.async_get_devices()
 
-        session = async_get_clientsession(self.hass)
-        api = NatureRemoApi(BASE_URL, token, session)
-        return {x["id"]: x for x in await api.get_devices()}
-
-    async def _discover_entities(self, token: str):
+    async def _discover_entities(self):
         """ Discover entities (appliances) from Nature Remo cloud account """
-
-        session = async_get_clientsession(self.hass)
-        api = NatureRemoApi(BASE_URL, token, session)
-        return {x["id"]: x for x in await api.get_appliances()}
+        return await self._coordinator.async_get_appliances()
 
     @core.callback
     def _async_create_entry_from_device(self, device):
