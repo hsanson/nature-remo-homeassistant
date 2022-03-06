@@ -88,7 +88,6 @@ class NatureSensor(CoordinatorEntity, SensorEntity):
 
     @core.callback
     def _handle_coordinator_update(self) -> None:
-        _LOGGER.info("Updating Nature Remo sensors")
         device = self.coordinator.data[CONF_DEVICES][self._device_id]
         self._attr_native_value = device["newest_events"][self._sensor]["val"]
         self._available = True
