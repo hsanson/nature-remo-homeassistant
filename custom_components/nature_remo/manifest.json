@@ -4,7 +4,7 @@
   "dependencies": [],
   "documentation": "https://github.com/hsanson/nature_remo",
   "domain": "nature_remo",
-  "iot_class": "assumed_state",
+  "iot_class": "cloud_polling",
   "name": "Nature Remo",
   "requirements": [],
   "version": "0.6.0"
