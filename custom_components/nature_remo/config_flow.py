@@ -1,7 +1,10 @@
 """ Nature Remo Config Flow Module """
 import logging
 from typing import Any, Dict, Optional
-from homeassistant.const import (CONF_ACCESS_TOKEN, CONF_DEVICE_ID, CONF_DEVICES)
+from homeassistant.const import (
+    CONF_ACCESS_TOKEN, CONF_DEVICE_ID,
+    CONF_DEVICES, CONF_ENTITIES
+)
 from homeassistant import config_entries, core
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
@@ -17,7 +20,8 @@ class NatureRemoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self):
         self._token = ""
-        self._discovered_devices = []
+        self._discovered_devices = {}
+        self._discovered_entities = {}
 
     data: Optional[Dict[str, Any]]
 
@@ -59,9 +63,10 @@ class NatureRemoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             self._discovered_devices = await self._discover_devices(self._token)
+            self._discovered_entities = await self._discover_entities(self._token)
         except NatureRemoApiError as error:
-            _LOGGER.error("Could not get list of devices - %s", error)
-            return self.async_abort(reason=error)
+            _LOGGER.error("Could not get list of devices/appliances - %s", error)
+            return self.async_abort(reason="connection_fail")
 
         devices_name = {
             device_id: f"{device['name']} {device['serial_number']}"
@@ -90,15 +95,24 @@ class NatureRemoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         api = NatureRemoApi(BASE_URL, token, session)
         return {x["id"]: x for x in await api.get_devices()}
 
+    async def _discover_entities(self, token: str):
+        """ Discover entities (appliances) from Nature Remo cloud account """
+
+        session = async_get_clientsession(self.hass)
+        api = NatureRemoApi(BASE_URL, token, session)
+        return {x["id"]: x for x in await api.get_appliances()}
+
     @core.callback
     def _async_create_entry_from_device(self, device):
         """ Create config entry for Nature Remo device """
         self._abort_if_unique_id_configured(updates={CONF_DEVICE_ID: device["id"]})
+        _LOGGER.info(self._discovered_entities)
         return self.async_create_entry(
             title=f"{device['name']} {device['serial_number']}",
             data={
                 CONF_ACCESS_TOKEN: self._token,
                 CONF_DEVICE_ID: device["id"],
                 CONF_DEVICES: self._discovered_devices,
+                CONF_ENTITIES: self._discovered_entities
             },
         )

@@ -2,6 +2,8 @@
   "config": {
     "error": {
       "auth": "The auth token provided is not valid."
+      "connection_fail": "Could not connect to nature remo cloud."
+      "no_devices_found": "No devices found."
     },
     "step": {
       "user": {
@@ -13,7 +15,7 @@
       },
       "pick_device": {
         "data": {
-          "device_id": "Device id",
+          "device_id": "Device ID",
           "devices": "Devices list"
         },
         "description": "Select device to integrate",
