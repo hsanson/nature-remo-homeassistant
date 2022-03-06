@@ -12,6 +12,7 @@
 
 ## Resources
 
+ - [Nature Remo Developers (Japanese Only!)](https://developer.nature.global/en/overview/)
  - [Nature Remo API](https://swagger.nature.global/)
  - [Home Assistant Developers](https://developers.home-assistant.io/docs/creating_component_index)
  - [Home Assistant Core Repo](https://github.com/home-assistant/core/blob/master/homeassistant/components)
