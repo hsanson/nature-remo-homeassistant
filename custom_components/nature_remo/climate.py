@@ -4,7 +4,6 @@ import logging
 from typing import Any, Dict
 from homeassistant.components.climate import ClimateEntity
 from homeassistant import config_entries, core
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.const import (
     CONF_ACCESS_TOKEN,
     CONF_DEVICE_ID,
@@ -24,8 +23,8 @@ from homeassistant.components.climate.const import (
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.const import (TEMP_CELSIUS, ATTR_TEMPERATURE)
-from . import (NatureRemoApi, NatureRemoApiCoordinator)
-from .const import (BASE_URL, DOMAIN)
+from . import (NatureRemoApiCoordinator)
+from .const import (DOMAIN, COORDINATOR)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -57,9 +56,7 @@ async def async_setup_entry(
 ):
     """ Setup entities from a config_flow entry """
     config = hass.data[DOMAIN][config_entry.entry_id]
-    session = async_get_clientsession(hass)
-    api = NatureRemoApi(BASE_URL, config[CONF_ACCESS_TOKEN], session)
-    coordinator = NatureRemoApiCoordinator(hass, api)
+    coordinator = hass.data[DOMAIN][COORDINATOR]
     device_id = config[CONF_DEVICE_ID]
     device = config[CONF_DEVICES][device_id]
     entities = []

@@ -5,6 +5,7 @@ from homeassistant.const import (TEMP_CELSIUS, PERCENTAGE, ILLUMINANCE)
 
 DOMAIN = "nature_remo"
 BASE_URL = "https://api.nature.global/1"
+COORDINATOR = "nature_remo_coordinator"
 
 SENSOR_NAMES = {
     "hu": "Humidity",

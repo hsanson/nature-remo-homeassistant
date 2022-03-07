@@ -6,9 +6,10 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
-from homeassistant.const import (CONF_DEVICES, CONF_ENTITIES)
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.const import (CONF_ACCESS_TOKEN, CONF_DEVICES, CONF_ENTITIES)
 
-from .const import DOMAIN
+from .const import (DOMAIN, BASE_URL, COORDINATOR)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,6 +19,10 @@ async def async_setup_entry(hass: core.HomeAssistant, entry: config_entries.Conf
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = entry.data
+
+    session = async_get_clientsession(hass)
+    api = NatureRemoApi(BASE_URL, entry.data[CONF_ACCESS_TOKEN], session)
+    hass.data[DOMAIN][COORDINATOR] = NatureRemoApiCoordinator(hass, api)
 
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(entry, "sensor")
@@ -92,7 +97,7 @@ class NatureRemoApiCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name="Nature Remo",
-            update_interval=timedelta(seconds=120),
+            update_interval=timedelta(seconds=60),
         )
         self.api = api
 

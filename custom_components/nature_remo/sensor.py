@@ -5,12 +5,11 @@ from typing import Any, Dict
 from dateutil import parser
 from homeassistant import config_entries, core
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.const import (CONF_ACCESS_TOKEN, CONF_DEVICE_ID, CONF_DEVICES)
+from homeassistant.const import (CONF_DEVICE_ID, CONF_DEVICES)
 from homeassistant.components.sensor import (SensorEntity, SensorStateClass)
 from homeassistant.components.binary_sensor import (BinarySensorEntity, BinarySensorDeviceClass)
-from . import (NatureRemoApi, NatureRemoApiCoordinator)
-from .const import (DOMAIN, BASE_URL, SENSOR_NAMES, SENSOR_UNITS, SENSOR_CLASSES)
+from . import (NatureRemoApiCoordinator)
+from .const import (DOMAIN, COORDINATOR, SENSOR_NAMES, SENSOR_UNITS, SENSOR_CLASSES)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,9 +23,7 @@ async def async_setup_entry(
 ):
     """ Setup sensors from a config_flow entry """
     config = hass.data[DOMAIN][config_entry.entry_id]
-    session = async_get_clientsession(hass)
-    api = NatureRemoApi(BASE_URL, config[CONF_ACCESS_TOKEN], session)
-    coordinator = NatureRemoApiCoordinator(hass, api)
+    coordinator = hass.data[DOMAIN][COORDINATOR]
     device_id = config[CONF_DEVICE_ID]
     device = config[CONF_DEVICES][device_id]
     sensors = []
