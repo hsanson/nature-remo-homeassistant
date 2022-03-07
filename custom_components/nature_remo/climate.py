@@ -66,8 +66,6 @@ async def async_setup_entry(
 
     if CONF_ENTITIES in config:
         for _, appliance in config[CONF_ENTITIES].items():
-
-            _LOGGER.info(appliance)
             # Ignore any appliance that do not belong to the device entry we are
             # registering
             if appliance["device"]["id"] != device_id:
