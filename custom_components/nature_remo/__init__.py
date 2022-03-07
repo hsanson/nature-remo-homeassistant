@@ -47,15 +47,6 @@ class NatureRemoApi():
             raise NatureRemoApiError(f"Connection error: {json['code']} {json['message']}")
         return json
 
-    async def get_device(self, device_id: str):
-        """ Retrieve single device """
-        _LOGGER.debug("Fetching device %s", device_id)
-        devices = {x["id"]: x for x in await self.get_devices()}
-        if device_id in devices:
-            return devices[device_id]
-
-        raise NatureRemoApiError("Connection error: 404001 device not found")
-
     async def get_devices(self):
         """ Retrive list of devices """
         _LOGGER.debug("Fetching device list")
@@ -65,15 +56,6 @@ class NatureRemoApi():
         if "code" in json:
             raise NatureRemoApiError(f"Connection error: {json['code']} {json['message']}")
         return json
-
-    async def get_appliance(self, appliance_id: str):
-        """ Retrieve single appliance """
-        _LOGGER.debug("Fetching appliance %s", appliance_id)
-        appliances = {x["id"]: x for x in await self.get_appliances()}
-        if appliance_id in appliances:
-            return appliances[appliance_id]
-
-        raise NatureRemoApiError("Connection error: 404001 device not found")
 
     async def get_appliances(self):
         """ Retrive list of devices for a single device """
