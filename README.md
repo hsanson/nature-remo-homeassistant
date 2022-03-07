@@ -20,5 +20,7 @@
 ## Credit
 
  - [Hass Nature Remo Custom Component](https://github.com/yutoyazaki/hass-nature-remo/)
+ - [Home Assistant for Nature Remo](https://github.com/mugifly/homeassistant-natureremo/)
  - [Building a Home Assistant custom component](https://aarongodfrey.dev/home%20automation/building_a_home_assistant_custom_component_part_1/)
  - [Nature Remo Python Client](https://github.com/morinokami/nature-remo)
+ - [Another Nature Remo Python Client](https://github.com/suzutan/pyture-remo)
