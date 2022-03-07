@@ -110,8 +110,7 @@ class NatureRemoApiCoordinator(DataUpdateCoordinator):
 
     async def async_post(self, path, data):
         """ Post data to Nature Remo cloud """
-        await self.api.post(path, data)
-        await self.async_request_refresh()
+        return await self.api.post(path, data)
 
     async def _async_update_data(self):
         """ Fetch Nature Remo data from Cloud """
