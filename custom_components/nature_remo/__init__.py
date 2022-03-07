@@ -92,7 +92,7 @@ class NatureRemoApiCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name="Nature Remo",
-            update_interval=timedelta(seconds=60),
+            update_interval=timedelta(seconds=120),
         )
         self.api = api
 
