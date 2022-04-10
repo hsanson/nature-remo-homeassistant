@@ -54,27 +54,29 @@ class NatureRemoApi():
 
     async def get_devices(self):
         """ Retrive list of devices """
-        _LOGGER.debug("Fetching device list")
+        _LOGGER.info("Fetching device list")
         headers = {"Authorization": f"Bearer {self.token}"}
         response = await self.session.get(f"{self.url}/devices", headers=headers)
         json = await response.json()
         if "code" in json:
             raise NatureRemoApiError(f"Connection error: {json['code']} {json['message']}")
+        _LOGGER.debug(json)
         return json
 
     async def get_appliances(self):
         """ Retrive list of devices for a single device """
-        _LOGGER.debug("Fetching appliances list")
+        _LOGGER.info("Fetching appliances list")
         headers = {"Authorization": f"Bearer {self.token}"}
         response = await self.session.get(f"{self.url}/appliances", headers=headers)
         json = await response.json()
         if "code" in json:
             raise NatureRemoApiError(f"Connection error: {json['code']} {json['message']}")
+        _LOGGER.debug(json)
         return json
 
     async def post(self, path, data):
         """Post any request"""
-        _LOGGER.debug("Post:%s, data:%s", path, data)
+        _LOGGER.info("Post:%s, data:%s", path, data)
         headers = {"Authorization": f"Bearer {self.token}"}
         response = await self.session.post(
             f"{self.url}{path}", data=data, headers=headers
@@ -82,6 +84,7 @@ class NatureRemoApi():
         json = await response.json()
         if "code" in json:
             raise NatureRemoApiError(f"Connection error: {json['code']} {json['message']}")
+        _LOGGER.debug(json)
         return json
 
 

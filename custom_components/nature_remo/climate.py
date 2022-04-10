@@ -230,13 +230,12 @@ class NatureRemoAC(CoordinatorEntity, ClimateEntity):
         if mode == MODE_HA_TO_REMO[HVAC_MODE_OFF]:
             await self._post({"button": mode})
         else:
-            data = {
-                "operation_mode": mode,
-                "temperature": self._default_temp[hvac_mode]
-            }
+            data = {"operation_mode": mode}
 
             if self._last_target_temperature[mode]:
                 data["temperature"] = self._last_target_temperature[mode]
+            elif self._default_temp.get(hvac_mode):
+                data["temperature"] = self._default_temp[hvac_mode]
 
             await self._post(data)
 
@@ -256,8 +255,12 @@ class NatureRemoAC(CoordinatorEntity, ClimateEntity):
     def _update(self, ac_settings, device=None):
         # hold this to determin the ac mode while it's turned-off
         self._remo_mode = ac_settings["mode"]
-        self._target_temperature = float(ac_settings["temp"])
-        self._last_target_temperature[self._remo_mode] = ac_settings["temp"]
+
+        if len(ac_settings["temp"]) > 0:
+            self._target_temperature = float(ac_settings["temp"])
+            self._last_target_temperature[self._remo_mode] = ac_settings["temp"]
+        else:
+            self._target_temperature = None
 
         if ac_settings["button"] == MODE_HA_TO_REMO[HVAC_MODE_OFF]:
             self._hvac_mode = HVAC_MODE_OFF
