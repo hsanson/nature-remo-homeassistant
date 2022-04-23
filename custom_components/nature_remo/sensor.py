@@ -88,6 +88,7 @@ class NatureSensor(CoordinatorEntity, SensorEntity):
         device = self.coordinator.data[CONF_DEVICES][self._device_id]
         self._attr_native_value = device["newest_events"][self._sensor]["val"]
         self._available = True
+        _LOGGER.debug("Update sensor %s with %s", self._sensor, self._attr_native_value)
         self.async_write_ha_state()
 
 
