@@ -24,11 +24,11 @@ async def async_setup_entry(hass: core.HomeAssistant, entry: config_entries.Conf
     api = NatureRemoApi(BASE_URL, entry.data[CONF_ACCESS_TOKEN], session)
     hass.data[DOMAIN][COORDINATOR] = NatureRemoApiCoordinator(hass, api)
 
-    hass.async_create_task(
+    await hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(entry, "sensor")
     )
 
-    hass.async_create_task(
+    await hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(entry, "climate")
     )
 

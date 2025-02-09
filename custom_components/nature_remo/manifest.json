@@ -7,5 +7,5 @@
   "iot_class": "cloud_polling",
   "name": "Nature Remo",
   "requirements": [],
-  "version": "0.6.0"
+  "version": "0.7.0"
 }

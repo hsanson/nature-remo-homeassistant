@@ -1,7 +1,7 @@
 """ Nature Remo Module Constants """
 
 from homeassistant.components.sensor import (SensorDeviceClass)
-from homeassistant.const import (TEMP_CELSIUS, PERCENTAGE, ILLUMINANCE)
+from homeassistant.const import (UnitOfTemperature, PERCENTAGE, ILLUMINANCE)
 
 DOMAIN = "nature_remo"
 BASE_URL = "https://api.nature.global/1"
@@ -23,5 +23,5 @@ SENSOR_CLASSES = {
 SENSOR_UNITS = {
     "hu": PERCENTAGE,
     "il": ILLUMINANCE,
-    "te": TEMP_CELSIUS
+    "te": UnitOfTemperature.CELSIUS
 }

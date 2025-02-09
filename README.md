@@ -2,6 +2,9 @@
 
 ## Installation
 
+ 1. Copy `custom_composnents/nature_remo` folder inside you HA installation
+    `config/custom_componsnets` and restart HA.
+
 ## Usage
 
  1. Go to https://home.nature.global and sign in/up
